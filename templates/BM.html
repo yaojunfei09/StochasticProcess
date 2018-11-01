@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel=stylesheet href="static/css/bootstrap.css">
+    <link rel=stylesheet href="static/css/bootstrap.min.css">
+    <link rel=stylesheet href="static/css/bootstrap-select.min.css">
+
+    <script src="static/js/echarts.js"></script>
+    <script src="static/js/jquery.min.js"></script>
+    <script src="static/js/bootstrap.min.js"></script>
+    <script src="static/js/bootstrap-select.min.js"></script>
+
+    <script type=text/javascript>
+        var $SCRIPT_ROOT = {{request.script_root|tojson|safe}};
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+        });
+    </script>
+    <title>Brownian Motion</title>
+
+    <script>
+    $(function(){
+        // initialize empty charts
+        performance_myChart = echarts.init(document.getElementById('brownian_chart'));
+
+        setInterval(brownian_motion_printer, 1000);
+        var select_data = {};
+        function brownian_motion_printer(){
+            $.ajax({
+                url: "/brownian_motion_printer",
+                type: 'POST',
+                data: select_data,
+                data_type: 'json',
+                success: function(msg){
+                    // get data from backend
+                    index_list = msg.index_list;
+                    brownian_motion_list = msg.brownian_motion_list;
+                    table_html = msg.table_html;
+
+                    // load data
+                    var performance_option = {
+                        title: {
+                            text: '',
+                            left: 0
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: index_list
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [{
+                            data: brownian_motion_list,
+                            type: 'line',
+                            animationDelay: function (idx) {
+                                return idx * 10;
+                            }
+                        }]
+                    };
+
+                    // load charts
+                    performance_myChart.setOption(performance_option);
+
+                    // load table
+                    $("#statistics_table").html(table_html);
+                }
+            });
+        }
+    })
+    </script>
+
+</head>
+
+
+
+<body>
+    <div class="form-group" style="margin-left:20px">
+        <br>
+        <label><h2>Brownian Motion</h2></label>
+    </div>
+
+    <div id="brownian_chart" style="width:1500px;height:500px;margin:auto">
+    </div>
+
+    <div id = "statistics_table" align="center">
+    </div>
+
+</body>
+</html>
